@@ -43,6 +43,7 @@ class AnswerWasAlreadyUsed(Exception):
 class Main(object):
     def __init__(self, args):
         self.items = args.items
+        self.ignore_spaces = args.ignore_spaces
         self.time_interval = float(args.time)
         self.write_for_extense = args.write_for_extense
         self.previous_checks = []
@@ -83,7 +84,11 @@ class Main(object):
                 else:
                     answer_items.append(item)
 
-            answer = ' '.join(answer_items)
+            if self.ignore_spaces:
+                answer = ''.join(answer_items)
+            else:
+                answer = ' '.join(answer_items)
+
 
             # Bails out if answer was already used and it's on memory (so we don't have to load the file again)
             if answer in self.previous_checks:
@@ -128,7 +133,8 @@ if __name__ == '__main__':
         p = argparse.ArgumentParser()
 
         p.add_argument('-f', '--file',                  help='File from where to pick answers.', default='answers.txt')
-        p.add_argument('-x', '--write-for-extense',     help='File from where to pick answers.', action='store_true')
+        p.add_argument('-x', '--write-for-extense',     help='Write numbers for extense.', action='store_true')
+        p.add_argument('-n', '--ignore-spaces',         help='Ignore spaces between items (i.e.: "100...300 5" would output numbers from 1000 to 3000 ending in 5.', action='store_true')
         p.add_argument('-t', '--time',                  help='Minimum time to wait between each message (in seconds). Accepts floats. [Default=3]', default=3)
         # p.add_argument('-i', '--init',                help='Initializes the giveaway process: opens the node scraper, clears the previous messages log'
 #                                                           + 'file, warns you to not forget to participate, amongst other checks. USE ONLY ONCE PER GIVEAWAY!')
