@@ -53,10 +53,10 @@ class Main(object):
         with open(args.file, 'r') as file:
             for line in file:
                 if not line.startswith('#') or not line.strip():
-                    self.words.append(line.lower().strip('\n '))
+                    self.words.append(line.strip('\n '))
 
     def generate_random_word(self):
-        return random.choice(self.words).strip()
+        return random.choice(self.words).casefold()
 
     def generate_random_number(self, range):
         try:
@@ -101,7 +101,7 @@ class Main(object):
             with open('messages.log', 'r') as file:
                 try:
                     for line in file:
-                        if answer in line:
+                        if answer.casefold() in line.casefold():
                             self.previous_checks.append(answer)
                             logger.error('Answer {} was already used before (file)'.format(answer))
                             raise Exception
