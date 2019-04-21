@@ -1,1 +1,0 @@
-- Add an auto diminishing time argument mode
