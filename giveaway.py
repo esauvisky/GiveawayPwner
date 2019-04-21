@@ -7,9 +7,10 @@ import argparse
 import asyncio
 import random
 import re
-import time
-# import numpy as np
 import scipy.stats
+import time
+
+# import numpy as np
 # import matplotlib.pyplot as plt
 
 
@@ -29,7 +30,7 @@ def trunc_gauss_int(bottom, top):
     '''
     lower = -1
     upper = 1
-    mu = 0
+    mu = 0              # 422516lu
     sigma = 0.7
 
     total_possibilities = abs(top - bottom) / 2
@@ -46,6 +47,7 @@ class Main(object):
         self.ignore_spaces = args.ignore_spaces
         self.time_interval = float(args.time)
         self.write_for_extense = args.write_for_extense
+        self.diminishing_time = args.diminishing_time
         self.previous_checks = []
         self.start_time = time.time() - self.time_interval
 
@@ -58,11 +60,11 @@ class Main(object):
     def generate_random_word(self):
         return random.choice(self.words).casefold()
 
-    def generate_random_number(self, range):
+    def generate_random_number(self, full_range):
         try:
-            first_number, last_number = str(range).split('...', 1)
+            first_number, last_number = str(full_range).split('...', 1)
         except:
-            logger.error('I cannot understand what you mean with: ' + str(range))
+            logger.error('I cannot understand what you mean with: ' + str(full_range))
             quit()
         else:
             first_number = min(int(first_number), int(last_number))
@@ -89,21 +91,25 @@ class Main(object):
             else:
                 answer = ' '.join(answer_items)
 
-
             # Bails out if answer was already used and it's on memory (so we don't have to load the file again)
             if answer in self.previous_checks:
                 logger.error('Answer {} was already used before (memory)'.format(answer))
                 continue
-
 
             # Otherwise load messages.log and check if anyone has sent an identical message before.
             # If so, bail out.
             with open('messages.log', 'r') as file:
                 try:
                     for line in file:
-                        if answer.casefold() in line.casefold():
+                        if answer.casefold() is line.casefold():
                             self.previous_checks.append(answer)
                             logger.error('Answer {} was already used before (file)'.format(answer))
+                            raise Exception
+                        elif answer.casefold() in line.casefold():
+                            self.previous_checks.append(answer)
+                            logger.error('Answer {} was already used before, but partially (file)'.format(answer))
+                            print(answer, line)
+                            print(answer.casefold(), line.casefold())
                             raise Exception
                 except:
                     continue
@@ -126,21 +132,24 @@ class Main(object):
                 self.start_time = time.time()
                 answer = await self.compile_new_answer()
                 await self.send_answer(answer)
+                if self.diminishing_time and self.time_interval > 1.5:
+                    self.time_interval = self.time_interval * 0.95
 
 
 if __name__ == '__main__':
     def cmdline_args():
         p = argparse.ArgumentParser()
 
-        p.add_argument('-f', '--file',                  help='File from where to pick answers.', default='answers.txt')
-        p.add_argument('-x', '--write-for-extense',     help='Write numbers for extense.', action='store_true')
-        p.add_argument('-n', '--ignore-spaces',         help='Ignore spaces between items (i.e.: "100...300 5" would output numbers from 1000 to 3000 ending in 5.', action='store_true')
-        p.add_argument('-t', '--time',                  help='Minimum time to wait between each message (in seconds). Accepts floats. [Default=3]', default=3)
-        # p.add_argument('-i', '--init',                help='Initializes the giveaway process: opens the node scraper, clears the previous messages log'
+        p.add_argument('-f', '--file', help='File from where to pick answers.', default='answers.txt')
+        p.add_argument('-x', '--write-for-extense', help='Write numbers for extense.', action='store_true')
+        p.add_argument('-n', '--ignore-spaces', help='Ignore spaces between items (i.e.: "100...300 5" would output numbers from 1000 to 3000 ending in 5.', action='store_true')
+        p.add_argument('-d', '--diminishing-time', help='Diminish [default = until 1.5s]', action='store_true')
+        p.add_argument('-t', '--time', help='Minimum time to wait between each message (in seconds). Accepts floats. [default = 3]', default=3)
+        # p.add_argument('-i', '--init', help='Initializes the giveaway process: opens the node scraper, clears the previous messages log'
 #                                                           + 'file, warns you to not forget to participate, amongst other checks. USE ONLY ONCE PER GIVEAWAY!')
-        p.add_argument('items', nargs='+',              help='List of items to input. Use three dots (...) as a placeholder for a randomly chosen item.'
-                                                            + 'If one item is of the format of int...int (e.g.: 1000...3000), then the script will fetch a'
-                                                            + 'random integer between the two adjacent numbers.')
+        p.add_argument('items', nargs='+', help='List of items to input. Use three dots (...) as a placeholder for a randomly chosen item.'
+                       + 'If one item is of the format of int...int (e.g.: 1000...3000), then the script will fetch a'
+                       + 'random integer between the two adjacent numbers.')
 
         res = p.parse_args()
         return res

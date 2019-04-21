@@ -31,24 +31,31 @@ bot.on("ready", () =>{
     // We will send a message to our console telling us that the bot has initiated correctly.
     console.log('The bot is online!'.green);
     console.log('Your username is: '.green.bold + bot.user.tag.bold);
+    console.log('Do not forget to participate!!'.yellow.bold);
 });
 
 // When a message is received, run the following code.
 bot.on("message", (message) => {
     let channelId = String(message.channel).substring(2, String(message.channel).length - 1);
+
     // Bails out if not #giveaway channel
     if (channelId != '480597151383158795') { return; }
 
-    let msg = String(message.content).replace(/\n/g, ' ').trim();
-    // let msg = String(message.content);
+    // Debug (chatroom channel)
+    // if (channelId != '260979786145333248') { return; }
+
+
+    // let msg = String(message.content).replace(/\n/g, ' ').trim()
+    let msg = String(message.content).replace(/\n/g, ' ').trim().toLowerCase();
+
 
     // Only adds the number to the array if it's unique (i.e.: the first time it's being submitted)
     if (theList.indexOf(msg) === -1) {
-        theList.push(msg.toLowerCase());
-        fs.appendFile('messages.log', msg +'\n', function (err) {});
-        console.log('\nUnique answer: ' + msg);
+        theList.push(msg);
+        fs.appendFile('messages.log', msg + '\n', function (err) {});
+        console.log('\nUnique Answer: ' + msg.blue.bold + ' (by ' + message.author.tag + ')');
     } else {
-        process.stdout.write(".");
+        process.stdout.write("-");
     }
 });
 
