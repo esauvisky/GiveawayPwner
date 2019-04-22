@@ -57,7 +57,19 @@ class Main(object):
                 if not line.startswith('#') or not line.strip():
                     self.words.append(line.strip('\n '))
 
-    def generate_random_word(self):
+    def generate_random_word(self, base_word=None):
+        '''
+        Arguments:
+            base_word {str} -- If passed, does not pick an answer that comes before
+                               base_word. Good for the 'pinap pinap razz' thing.
+        '''
+        if base_word is not None:
+            logger.warning('Using %s as a floor/base word.', base_word)
+            logger.warning('All available options are %s', self.words[self.words.index(base_word):])
+            # try:
+            return random.choice(self.words[self.words.index(base_word):]).casefold()
+            # except:
+            #     return random.choice(self.words).casefold()
         return random.choice(self.words).casefold()
 
     def generate_random_number(self, full_range):
@@ -78,11 +90,21 @@ class Main(object):
     async def compile_new_answer(self):
         while True:
             answer_items = []
-            for item in self.items:
+            for index, item in enumerate(self.items):
                 if re.match(RE_INTEGER_RANGE, item):
                     answer_items.append(self.generate_random_number(item))
                 elif item == '...':
-                    answer_items.append(self.generate_random_word())
+                    if index is 0:
+                        word = self.generate_random_word()
+                        logger.warning('First generated word: %s', word)
+                        answer_items.append(word)
+                        continue
+
+                    word = self.generate_random_word(answer_items[index-1])
+                    else:
+                        word = self.generate_random_word()
+                    finally:
+                        answer_items.append(word)
                 else:
                     answer_items.append(item)
 
