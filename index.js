@@ -1,6 +1,8 @@
 // jshint esversion: 6
 /*
 Author: Emi Bemol <esauvisky@gmail.com>
+
+TODO: ADD TIMESTAMPS TO EACH LOGGED LINE
 */
 
 // Libraries
@@ -9,19 +11,20 @@ const colors = require('colors');
 const fs = require("fs");
 var spawn = require('child_process').spawn;
 var theList = [];
+var isLinux = process.platform === "linux";
 
 // Grabs configs from the JSON file
 hotload = require("hotload");
 var first_time = true;
 config = hotload('./config.json.js', function(config2) {
     if (! first_time) {
-        spawn('notify-send', ['GiveawayPwner', 'Reloading configs...']);
+        if (isLinux) { spawn('notify-send', ['GiveawayPwner', 'Reloading configs...']); }
     } else {
         first_time = false;
     }
 });
 
-spawn('notify-send', ['GiveawayPwner', 'DO NOT FORGET TO PARTICIPATE']);
+if (isLinux) { spawn('notify-send', ['GiveawayPwner', 'DO NOT FORGET TO PARTICIPATE']); }
 
 // Here we define our client, most people call it "client" but I prefer to call it "bot".
 bot = new Discord.Client({forceFetchUsers: true});
@@ -53,7 +56,7 @@ bot.on("message", (message) => {
     if (theList.indexOf(msg) === -1) {
         theList.push(msg);
         fs.appendFile('messages.log', msg + '\n', function (err) {});
-        console.log('\nUnique Answer: ' + msg.blue.bold + ' (by ' + message.author.tag + ')');
+        console.log('\n[' + (new Date()).toJSON().slice(0, 19).replace(/[-T]/g, ':') + '] Unique Answer: ' + msg.blue.bold + ' (by ' + message.author.tag + ')');
     } else {
         process.stdout.write("-");
     }

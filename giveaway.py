@@ -1,6 +1,6 @@
 #!/usr/bin/env python3.7
 __author__ = "Emiliano Sauvisky"
-__version__ = "0.1.0"
+__version__ = "1.0"
 __license__ = "MIT"
 
 import argparse
@@ -47,6 +47,7 @@ class Main(object):
         self.ignore_spaces = args.ignore_spaces
         self.time_interval = float(args.time)
         self.write_for_extense = args.write_for_extense
+        self.leading_zeroes = args.leading_zeroes
         self.diminishing_time = args.diminishing_time
         self.previous_checks = []
         self.start_time = time.time() - self.time_interval
@@ -72,6 +73,10 @@ class Main(object):
 
         if self.write_for_extense:
             return str(num2words(trunc_gauss_int(first_number, last_number))).replace('-', ' ').replace(',', '')
+        if self.leading_zeroes:
+            integer = trunc_gauss_int(first_number, last_number)
+            ret_len = max(len(str(first_number)), len(str(last_number)))
+            return str("{:0{precision}d}".format(integer, precision=ret_len))
         else:
             return str(trunc_gauss_int(first_number, last_number))
 
@@ -101,16 +106,16 @@ class Main(object):
             with open('messages.log', 'r') as file:
                 try:
                     for line in file:
-                        if answer.casefold() is line.casefold():
+                        if answer.casefold() == line.casefold().strip():
                             self.previous_checks.append(answer)
                             logger.error('Answer {} was already used before (file)'.format(answer))
                             raise Exception
-                        elif answer.casefold() in line.casefold():
-                            self.previous_checks.append(answer)
-                            logger.error('Answer {} was already used before, but partially (file)'.format(answer))
-                            print(answer, line)
-                            print(answer.casefold(), line.casefold())
-                            raise Exception
+                        # elif answer.casefold() in line.casefold():
+                        #     self.previous_checks.append(answer)
+                        #     logger.error('Answer {} was already used before, but partially (file)'.format(answer))
+                        #     # print(answer, line)
+                        #     # print(answer.casefold(), line.casefold())
+                        #     raise Exception
                 except:
                     continue
 
@@ -142,14 +147,13 @@ if __name__ == '__main__':
 
         p.add_argument('-f', '--file', help='File from where to pick answers.', default='answers.txt')
         p.add_argument('-x', '--write-for-extense', help='Write numbers for extense.', action='store_true')
+        p.add_argument('-z', '--leading-zeroes', help='Keep leading zeroes', action='store_true')
         p.add_argument('-n', '--ignore-spaces', help='Ignore spaces between items (i.e.: "100...300 5" would output numbers from 1000 to 3000 ending in 5.', action='store_true')
         p.add_argument('-d', '--diminishing-time', help='Diminish [default = until 1.5s]', action='store_true')
-        p.add_argument('-t', '--time', help='Minimum time to wait between each message (in seconds). Accepts floats. [default = 3]', default=3)
-        # p.add_argument('-i', '--init', help='Initializes the giveaway process: opens the node scraper, clears the previous messages log'
-#                                                           + 'file, warns you to not forget to participate, amongst other checks. USE ONLY ONCE PER GIVEAWAY!')
+        p.add_argument('-t', '--time', help='Minimum time to wait between each message (in seconds). Accepts floats. [default = 2]', default=2)
         p.add_argument('items', nargs='+', help='List of items to input. Use three dots (...) as a placeholder for a randomly chosen item.'
-                       + 'If one item is of the format of int...int (e.g.: 1000...3000), then the script will fetch a'
-                       + 'random integer between the two adjacent numbers.')
+                       + ' If one item is of the format of int...int (e.g.: 1000...3000), then the script will fetch a'
+                       + ' random integer between the two adjacent numbers.')
 
         res = p.parse_args()
         return res
