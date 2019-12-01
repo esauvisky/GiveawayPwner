@@ -1,7 +1,6 @@
 # GiveawayPwner
 
-If you know what this is for, then have fun and share the prize as I shared the code! :)
-
+Wins guess-type giveaways on Discord by keeping a log of unique answers while prioritising answers from a truncated normal standard distribution to increase the odds of winning.
 
 ## Config
 
@@ -23,13 +22,11 @@ $ node index.js
 
 - Get an account with some score on 001xédekoP. Can be your main. **Must be the same account that's gonna participate on the giveaway.**
 
-– Get its token by following the [Token](/#Token) section below.
+– Get its token by following the [Token](#token) section below.
 
-- Copy `config.json.example.js` to `config.json.js` and edit the token in there.
-  - You can add multiple tokens for multiple accounts, just keep an eye on phone verifications and stuff.
-, it must be able to speak on #general channel for it to work.
+- Edit `config.json.js` and add your token in there.
 
-- Run `node index.js` and check if it properly detects the account, it should output its name.
+- Run `node index.js` and check if it properly detects the account, it should output its name#tag.
 
 ### Token
 See [GetToken.gif]().
@@ -62,8 +59,6 @@ $ ./giveaway.py -f /text-answers/gens1-4/gen3rev.txt ...
 $ ./giveaway.py -t 2 -f text-answers/items.txt -n ... , ... , ... , ... , ...
 ```
 
+## Issues:
 
-## TODO:
-When using -z (leading zeros) alongside -n (strip spaces), something doesn't work quite well.
-
-**FIX IT AND SEND PR**
+- When using -z (leading zeros) alongside -n (strip spaces), something doesn't work quite well.
